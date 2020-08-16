@@ -41,7 +41,7 @@ metadata:
   name: cert-checker
   namespace: cert-checker
 spec:
-  schedule: "31 * * * *"
+  schedule: "0 8 * * *"
   jobTemplate:
     metadata:
       labels:
