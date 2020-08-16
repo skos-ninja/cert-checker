@@ -2,6 +2,8 @@
 
 cert-checker allows you to scan for certificates in a kubernetes cluster and alert you via slack when they are set to expire soon.
 
+![example message](https://github.com/skos-ninja/cert-checker/blob/master/example/example-msg.png?raw=true)
+
 ## Parameters
 
 - `--expires-in-days` sets the number of days before the certificates expire to alert
