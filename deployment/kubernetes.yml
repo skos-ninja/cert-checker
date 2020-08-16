@@ -1,0 +1,61 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: cert-checker
+  labels:
+    name: cert-checker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-checker-service-account
+  namespace: cert-checker
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: cert-checker
+  name: cert-secret-reader
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1 # This needs to be cloned for each namespace or converted to a ClusterRoleBinding
+kind: RoleBinding
+metadata:
+  name: cert-checker-read-secrets
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: cert-checker-service-account
+  namespace: cert-checker
+roleRef:
+  kind: ClusterRole
+  name: cert-secret-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cert-checker
+  namespace: cert-checker
+spec:
+  schedule: "31 * * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        app: cert-checker
+    spec:
+      template:
+        spec:
+          serviceAccountName: cert-checker-service-account
+          restartPolicy: OnFailure
+          containers:
+          - name: app
+            image: skos/cert-checker:latest
+            imagePullPolicy: Always
+            args:
+            - --namespace=default
+            - --expires-in-days=31
+            - --slack-webhook=<webhook-url>
