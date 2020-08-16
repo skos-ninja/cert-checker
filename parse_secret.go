@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"log"
@@ -35,8 +36,14 @@ func parseSecret(secret v1.Secret) ([]Cert, error) {
 }
 
 func parseCert(data []byte) (*x509.Certificate, error) {
-	certPEM := string(data)
-	block, _ := pem.Decode([]byte(certPEM))
+	// Try to base64 parse our cert before pem decoding
+	base64String := string(data)
+	parsedData, err := base64.StdEncoding.DecodeString(base64String)
+	if err != nil {
+		parsedData = data
+	}
+
+	block, _ := pem.Decode(parsedData)
 	if block == nil {
 		// Data isn't a valid pem
 		return nil, ErrSecretNotCert
