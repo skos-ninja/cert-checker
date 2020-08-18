@@ -7,20 +7,34 @@ import (
 	"errors"
 	"log"
 
+	"github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 )
 
 var (
-	ErrSecretNotCert = errors.New("secret is not a valid certificate")
+	errSecretNotPEM  = errors.New("secret is not a valid PEM")
+	errSecretNotCert = errors.New("secret is not a valid certificate")
 )
 
 func parseSecret(secret v1.Secret) ([]Cert, error) {
 	certs := make([]Cert, 0)
+	logger := logrus.WithFields(logrus.Fields{
+		"namspeace": secret.Namespace,
+		"name":      secret.Name,
+	})
 
 	for key, data := range secret.Data {
+		logger := logger.WithField("key", key)
 		cert, err := parseCert(data)
-		if err == ErrSecretNotCert {
+		switch err {
+		case errSecretNotPEM:
+			logger.Debug("Skipping secret as not PEM")
 			continue
+		case errSecretNotCert:
+			logger.Info("Skipping secret as not a valid certificate")
+			continue
+		default:
+			logger.WithError(err).Error("Failed to parse secret")
 		}
 
 		certs = append(certs, Cert{
@@ -46,15 +60,19 @@ func parseCert(data []byte) (*x509.Certificate, error) {
 	block, _ := pem.Decode(parsedData)
 	if block == nil {
 		// Data isn't a valid pem
-		return nil, ErrSecretNotCert
+		return nil, errSecretNotPEM
+	}
+
+	// Ensure we ignore secrets that aren't a certificate
+	if block.Type != "CERTIFICATE" {
+		return nil, errSecretNotCert
 	}
 
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
 		// PEM isn't a valid certificate
-		// This is probably because it's a key however this should probably be checked 🤔
 		log.Printf("Error parsing certificate %s\n", err.Error())
-		return nil, ErrSecretNotCert
+		return nil, err
 	}
 
 	return cert, nil

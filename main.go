@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -20,6 +21,8 @@ func main() {
 	cmd.Flags().StringArrayVarP(&namespaces, "namespace", "n", namespaces, "Define a namespace to scan")
 	cmd.Flags().IntVarP(&expiresInDays, "expires-in-days", "e", expiresInDays, "Sets the number of days before expiry to alert")
 	cmd.Flags().StringVarP(&slackWebHook, "slack-webhook", "s", slackWebHook, "Slack webhook url for the client to alert with")
+
+	logrus.SetFormatter(&logrus.JSONFormatter{})
 
 	if err := cmd.Execute(); err != nil {
 		panic(err.Error())
