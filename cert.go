@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/x509"
 	"fmt"
+	"math"
+	"time"
 )
 
 type Cert struct {
@@ -37,4 +39,11 @@ func (c Cert) ToSlackMessage() SlackBlock {
 	}
 
 	return context
+}
+
+func (c Cert) ExpiresInDays() int {
+	expiry := c.X509.NotAfter
+	expiresInDays := expiry.Sub(time.Now()).Hours() / 24
+
+	return int(math.Floor(expiresInDays))
 }

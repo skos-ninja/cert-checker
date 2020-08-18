@@ -1,28 +1,24 @@
 package main
 
 import (
-	"time"
-
 	"github.com/sirupsen/logrus"
 )
 
 func checkCerts(certs []Cert) error {
 	expiringCerts := make([]Cert, 0, len(certs))
 
-	now := time.Now()
-	expireAlertDate := now.Add(time.Duration(expiresInDays) * time.Duration(24) * time.Hour)
 	for _, cert := range certs {
 		cert := cert
-		expiry := cert.X509.NotAfter
+		expiresInDays := cert.ExpiresInDays()
 
 		logrus.WithFields(logrus.Fields{
 			"namespace": cert.Namespace,
 			"name":      cert.Name,
 			"key":       cert.Key,
 			"subject":   cert.X509.Subject,
-		}).Infof("Expires in %.f", expireAlertDate.Sub(expiry).Hours()/24)
+		}).Infof("Expires in %v", expiresInDays)
 
-		if expiry.Before(expireAlertDate) {
+		if expiresInDays <= expiresInDays {
 			expiringCerts = append(expiringCerts, cert)
 		}
 	}
