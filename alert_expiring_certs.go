@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -12,7 +14,7 @@ type SlackMessage struct {
 	Blocks []interface{} `json:"blocks"`
 }
 
-type SlackHeader struct {
+type SlackSection struct {
 	Type string     `json:"type"`
 	Text SlackBlock `json:"text"`
 }
@@ -31,11 +33,11 @@ func alertExpiringCerts(certs []Cert) error {
 
 	message := SlackMessage{}
 
-	message.Blocks = append(message.Blocks, SlackHeader{
+	message.Blocks = append(message.Blocks, SlackSection{
 		Type: "header",
 		Text: SlackBlock{
 			Type: "plain_text",
-			Text: fmt.Sprintf("You have certificates expiring within %v days:", expiresInDays),
+			Text: fmt.Sprintf("You have certificates expiring within %v days", expiresInDays),
 		},
 	})
 
@@ -44,9 +46,19 @@ func alertExpiringCerts(certs []Cert) error {
 		Type: "divider",
 	})
 
-	// Add each cert as a block
+	// group our certs by their fingerprint
+	groupedCert := make(map[string][]Cert)
 	for _, cert := range certs {
-		message.Blocks = append(message.Blocks, cert.ToSlackMessage())
+		cert := cert
+		fingerprint := getMD5Hash(cert.X509.Raw)
+		groupedCert[fingerprint] = append(groupedCert[fingerprint], cert)
+	}
+
+	// Add each cert to our message
+	for fingerprint, certs := range groupedCert {
+		if len(certs) > 0 {
+			message.Blocks = append(message.Blocks, certsToSlackMessage(fingerprint, certs))
+		}
 	}
 
 	// Send our webhook to slack
@@ -60,4 +72,9 @@ func alertExpiringCerts(certs []Cert) error {
 	}
 
 	return nil
+}
+
+func getMD5Hash(data []byte) string {
+	hash := md5.Sum(data)
+	return hex.EncodeToString(hash[:])
 }
