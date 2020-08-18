@@ -18,9 +18,9 @@ func certsToSlackMessage(fingerprint string, certs []Cert) SlackSection {
 	days := certs[0].ExpiresInDays()
 	sb.WriteString(strconv.Itoa(days))
 	if days == 1 {
-		sb.WriteString("day")
+		sb.WriteString(" day")
 	} else {
-		sb.WriteString("days")
+		sb.WriteString(" days")
 	}
 	sb.WriteString("\n")
 
