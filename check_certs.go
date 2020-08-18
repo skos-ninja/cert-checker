@@ -9,16 +9,16 @@ func checkCerts(certs []Cert) error {
 
 	for _, cert := range certs {
 		cert := cert
-		expiresInDays := cert.ExpiresInDays()
+		certExpires := cert.ExpiresInDays()
 
 		logrus.WithFields(logrus.Fields{
 			"namespace": cert.Namespace,
 			"name":      cert.Name,
 			"key":       cert.Key,
 			"subject":   cert.X509.Subject,
-		}).Infof("Expires in %v", expiresInDays)
+		}).Infof("Expires in %v", certExpires)
 
-		if expiresInDays <= expiresInDays {
+		if certExpires <= expiresInDays {
 			expiringCerts = append(expiringCerts, cert)
 		}
 	}
