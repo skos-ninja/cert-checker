@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"strconv"
 	"strings"
 )
@@ -14,13 +15,25 @@ func certsToSlackMessage(fingerprint string, certs []Cert) SlackSection {
 	sb.WriteString("\n")
 
 	// Expiry
-	sb.WriteString("Expires in ")
 	days := certs[0].ExpiresInDays()
-	sb.WriteString(strconv.Itoa(days))
-	if days == 1 {
-		sb.WriteString(" day")
+	if days < 0 {
+		sb.WriteString("*EXPIRED ")
+		days = int(math.Abs(float64(days)))
+		sb.WriteString(strconv.Itoa(days))
+		if days == 1 {
+			sb.WriteString("DAY")
+		} else {
+			sb.WriteString("DAYS")
+		}
+		sb.WriteString(" AGO*")
 	} else {
-		sb.WriteString(" days")
+		sb.WriteString("Expires in ")
+		sb.WriteString(strconv.Itoa(days))
+		if days == 1 {
+			sb.WriteString(" day")
+		} else {
+			sb.WriteString(" days")
+		}
 	}
 	sb.WriteString("\n")
 
