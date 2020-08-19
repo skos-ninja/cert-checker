@@ -35,6 +35,13 @@ func runE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if len(namespaces) == 1 && namespaces[0] == allNamespaces {
+		namespaces, err = getNamespaces(client)
+		if err != nil {
+			return err
+		}
+	}
+
 	secrets, err := getSecrets(client, namespaces...)
 	if err != nil {
 		return err

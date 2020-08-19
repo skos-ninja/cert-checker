@@ -8,7 +8,7 @@ cert-checker allows you to scan for certificates in a kubernetes cluster and ale
 
 - `--expires-in-days` sets the number of days before the certificates expire to alert
 - `--slack-webhook` defines the webhook URL of the slack app
-- `--namespace` can be passed multiple times to define each namespace that the app should scan
+- `--namespace` can be passed multiple times to define each namespace that the app should scan (for all namespaces provide `*`)
 
 ## Deployment
 
