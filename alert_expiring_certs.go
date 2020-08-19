@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -47,17 +45,12 @@ func alertExpiringCerts(certs []Cert) error {
 	})
 
 	// group our certs by their fingerprint
-	groupedCert := make(map[string][]Cert)
-	for _, cert := range certs {
-		cert := cert
-		fingerprint := getMD5Hash(cert.X509.Raw)
-		groupedCert[fingerprint] = append(groupedCert[fingerprint], cert)
-	}
+	groupedCerts := groupCerts(certs)
 
 	// Add each cert to our message
-	for fingerprint, certs := range groupedCert {
-		if len(certs) > 0 {
-			message.Blocks = append(message.Blocks, certsToSlackMessage(fingerprint, certs))
+	for _, group := range groupedCerts {
+		if len(group.Certs) > 0 {
+			message.Blocks = append(message.Blocks, group.ToSlackMessage())
 		}
 	}
 
@@ -72,9 +65,4 @@ func alertExpiringCerts(certs []Cert) error {
 	}
 
 	return nil
-}
-
-func getMD5Hash(data []byte) string {
-	hash := md5.Sum(data)
-	return hex.EncodeToString(hash[:])
 }
