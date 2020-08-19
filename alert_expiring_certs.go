@@ -31,11 +31,24 @@ func alertExpiringCerts(certs []Cert) error {
 
 	message := SlackMessage{}
 
+	// group our certs by their fingerprint
+	groupedCerts := groupCerts(certs)
+
+	title := ""
+	if groupedCerts[0].ExpiresInDays < 1 {
+		title = fmt.Sprintf("You have EXPIRED CERTIFICATES!")
+	} else {
+		days := "days"
+		if groupedCerts[0].ExpiresInDays == 1 {
+			days = "day"
+		}
+		title = fmt.Sprintf("You have certificates expiring within %v %s", groupedCerts[0].ExpiresInDays, days)
+	}
 	message.Blocks = append(message.Blocks, SlackSection{
 		Type: "header",
 		Text: SlackBlock{
 			Type: "plain_text",
-			Text: fmt.Sprintf("You have certificates expiring within %v days", expiresInDays),
+			Text: title,
 		},
 	})
 
@@ -43,9 +56,6 @@ func alertExpiringCerts(certs []Cert) error {
 	message.Blocks = append(message.Blocks, SlackBlock{
 		Type: "divider",
 	})
-
-	// group our certs by their fingerprint
-	groupedCerts := groupCerts(certs)
 
 	// Add each cert to our message
 	for _, group := range groupedCerts {
