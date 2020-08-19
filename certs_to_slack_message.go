@@ -25,12 +25,16 @@ func certsToSlackMessage(fingerprint string, certs []Cert) SlackSection {
 	sb.WriteString("\n")
 
 	// Secret keys
-	sb.WriteString("```")
-	for _, cert := range certs {
-		sb.WriteString(cert.ToKey())
-		sb.WriteString("\n")
+	if len(certs) == 1 {
+		sb.WriteString("Secret:\n")
+	} else {
+		sb.WriteString("Secrets:\n")
 	}
-	sb.WriteString("```")
+	for _, cert := range certs {
+		sb.WriteString("`")
+		sb.WriteString(cert.ToKey())
+		sb.WriteString("`\n")
+	}
 
 	block := SlackSection{
 		Type: "section",
