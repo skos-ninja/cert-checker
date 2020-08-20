@@ -30,9 +30,9 @@ func (g GroupedCert) ToSlackMessage() SlackSection {
 		days = int(math.Abs(float64(days)))
 		sb.WriteString(strconv.Itoa(days))
 		if days == 1 {
-			sb.WriteString("DAY")
+			sb.WriteString(" DAY")
 		} else {
-			sb.WriteString("DAYS")
+			sb.WriteString(" DAYS")
 		}
 		sb.WriteString(" AGO*")
 	} else {
