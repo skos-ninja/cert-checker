@@ -12,15 +12,17 @@ var (
 		RunE: runE,
 	}
 
-	namespaces    = []string{"default"}
-	expiresInDays = 31
-	slackWebHook  = ""
+	namespaces        = []string{"default"}
+	expiresInDays     = 31
+	slackWebHook      = ""
+	environmentString = ""
 )
 
 func main() {
 	cmd.Flags().StringArrayVarP(&namespaces, "namespace", "n", namespaces, "Define a namespace to scan")
 	cmd.Flags().IntVarP(&expiresInDays, "expires-in-days", "e", expiresInDays, "Sets the number of days before expiry to alert")
 	cmd.Flags().StringVarP(&slackWebHook, "slack-webhook", "s", slackWebHook, "Slack webhook url for the client to alert with")
+	cmd.Flags().StringVar(&environmentString, "environment", environmentString, "Adds an environment to your expired certs message")
 
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 

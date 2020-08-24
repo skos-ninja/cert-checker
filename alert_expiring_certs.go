@@ -36,13 +36,20 @@ func alertExpiringCerts(certs []Cert) error {
 
 	title := ""
 	if groupedCerts[0].ExpiresInDays < 1 {
-		title = fmt.Sprintf("You have EXPIRED CERTIFICATES!")
+		title = fmt.Sprintf("You have EXPIRED CERTIFICATES")
+		if environmentString != "" {
+			title += fmt.Sprintf("in %s", environmentString)
+		}
+		title += "!"
 	} else {
 		days := "days"
 		if groupedCerts[0].ExpiresInDays == 1 {
 			days = "day"
 		}
 		title = fmt.Sprintf("You have certificates expiring within %v %s", groupedCerts[0].ExpiresInDays, days)
+		if environmentString != "" {
+			title += fmt.Sprintf("in %s", environmentString)
+		}
 	}
 	message.Blocks = append(message.Blocks, SlackSection{
 		Type: "header",
