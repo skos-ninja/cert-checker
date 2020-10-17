@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type GroupedCert struct {
@@ -69,7 +70,7 @@ func (g GroupedCert) ToSlackMessage() SlackSection {
 	return block
 }
 
-func groupCerts(certs []Cert) []GroupedCert {
+func groupCerts(certs []Cert, t time.Time) []GroupedCert {
 	groupedCert := make(map[string][]Cert)
 	for _, cert := range certs {
 		cert := cert
@@ -81,7 +82,7 @@ func groupCerts(certs []Cert) []GroupedCert {
 	for fingerprint, certs := range groupedCert {
 		gCerts = append(gCerts, GroupedCert{
 			Fingerprint:   fingerprint,
-			ExpiresInDays: certs[0].ExpiresInDays(),
+			ExpiresInDays: certs[0].ExpiresInDays(t),
 			Certs:         certs,
 		})
 	}

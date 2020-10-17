@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 type SlackMessage struct {
@@ -23,7 +24,7 @@ type SlackBlock struct {
 	Elements []SlackBlock `json:"elements,omitempty"`
 }
 
-func alertExpiringCerts(certs []Cert) error {
+func alertExpiringCerts(certs []Cert, t time.Time) error {
 	if slackWebHook == "" {
 		log.Println("No slack webhook set. Skipping alert")
 		return nil
@@ -32,7 +33,7 @@ func alertExpiringCerts(certs []Cert) error {
 	message := SlackMessage{}
 
 	// group our certs by their fingerprint
-	groupedCerts := groupCerts(certs)
+	groupedCerts := groupCerts(certs, t)
 
 	title := ""
 	if groupedCerts[0].ExpiresInDays < 1 {

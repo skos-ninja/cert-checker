@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -12,15 +14,19 @@ var (
 		RunE: runE,
 	}
 
-	namespaces        = []string{"default"}
-	expiresInDays     = 31
-	slackWebHook      = ""
-	environmentString = ""
+	namespaces          = []string{"default"}
+	expiresInDays       = 31
+	maxExpiredInDays    = 31
+	minCertLengthInDays = 0
+	slackWebHook        = ""
+	environmentString   = ""
 )
 
 func main() {
 	cmd.Flags().StringArrayVarP(&namespaces, "namespace", "n", namespaces, "Define a namespace to scan")
 	cmd.Flags().IntVarP(&expiresInDays, "expires-in-days", "e", expiresInDays, "Sets the number of days before expiry to alert")
+	cmd.Flags().IntVarP(&maxExpiredInDays, "max-expired-in-days", "m", maxExpiredInDays, "Sets the number of days after expiry to stop alerting")
+	cmd.Flags().IntVarP(&minCertLengthInDays, "min-cert-length-in-days", "l", minCertLengthInDays, "Sets the minimum number of days the certificate has to be valid before it is considered for alerting")
 	cmd.Flags().StringVarP(&slackWebHook, "slack-webhook", "s", slackWebHook, "Slack webhook url for the client to alert with")
 	cmd.Flags().StringVar(&environmentString, "environment", environmentString, "Adds an environment to your expired certs message")
 
@@ -32,6 +38,8 @@ func main() {
 }
 
 func runE(cmd *cobra.Command, args []string) error {
+	now := time.Now()
+
 	client, err := getClientSet()
 	if err != nil {
 		return err
@@ -59,5 +67,5 @@ func runE(cmd *cobra.Command, args []string) error {
 		certs = append(certs, c...)
 	}
 
-	return checkCerts(certs)
+	return checkCerts(certs, now)
 }
