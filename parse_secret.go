@@ -33,6 +33,9 @@ func parseSecret(secret v1.Secret) ([]Cert, error) {
 		case errSecretNotCert:
 			logger.Info("Skipping secret as not a valid certificate")
 			continue
+		// Ignore as it's not an error...
+		case nil:
+			break
 		default:
 			logger.WithError(err).Error("Failed to parse secret")
 		}
