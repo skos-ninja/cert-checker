@@ -19,7 +19,7 @@ var (
 func parseSecret(secret v1.Secret) ([]Cert, error) {
 	certs := make([]Cert, 0)
 	logger := logrus.WithFields(logrus.Fields{
-		"namspeace": secret.Namespace,
+		"namespace": secret.Namespace,
 		"name":      secret.Name,
 	})
 
