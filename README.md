@@ -11,6 +11,8 @@ cert-checker allows you to scan for certificates in a kubernetes cluster and ale
 - `--min-cert-length-in-days` set the minimum number of days a certificate has to be valid for to alert
 - `--slack-webhook` defines the webhook URL of the slack app
 - `--namespace` can be passed multiple times to define each namespace that the app should scan (for all namespaces provide `*`)
+- `--environment` specifies the environment context for the slack message
+- `--alert-no-flagged-certs` enables a slack message for when no certificates are flagged
 
 ## Deployment
 

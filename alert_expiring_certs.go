@@ -1,35 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
 	"time"
 )
 
-type SlackMessage struct {
-	Blocks []interface{} `json:"blocks"`
-}
-
-type SlackSection struct {
-	Type string     `json:"type"`
-	Text SlackBlock `json:"text"`
-}
-
-type SlackBlock struct {
-	Type     string       `json:"type"`
-	Text     string       `json:"text,omitempty"`
-	Elements []SlackBlock `json:"elements,omitempty"`
-}
-
 func alertExpiringCerts(certs []Cert, t time.Time) error {
-	if slackWebHook == "" {
-		log.Println("No slack webhook set. Skipping alert")
-		return nil
-	}
-
 	message := SlackMessage{}
 
 	// group our certs by their fingerprint
@@ -72,15 +48,5 @@ func alertExpiringCerts(certs []Cert, t time.Time) error {
 		}
 	}
 
-	// Send our webhook to slack
-	buf, err := json.Marshal(message)
-	if err != nil {
-		return err
-	}
-	_, err = http.Post(slackWebHook, "application/json", bytes.NewBuffer(buf))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return sendToSlack(message)
 }

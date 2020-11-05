@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func checkCerts(certs []Cert, t time.Time) error {
+func checkCerts(certs []Cert, t time.Time) []Cert {
 	expiringCerts := make([]Cert, 0, len(certs))
 
 	for _, cert := range certs {
@@ -18,11 +18,7 @@ func checkCerts(certs []Cert, t time.Time) error {
 		}
 	}
 
-	if len(expiringCerts) > 0 {
-		return alertExpiringCerts(expiringCerts, t)
-	}
-
-	return nil
+	return expiringCerts
 }
 
 func isCertFlagged(minCert, expires, expired int, cert Cert, t time.Time) bool {

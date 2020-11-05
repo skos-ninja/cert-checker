@@ -14,12 +14,13 @@ var (
 		RunE: runE,
 	}
 
-	namespaces          = []string{"default"}
-	expiresInDays       = 31
-	maxExpiredInDays    = 31
-	minCertLengthInDays = 0
-	slackWebHook        = ""
-	environmentString   = ""
+	namespaces                = []string{"default"}
+	expiresInDays             = 31
+	maxExpiredInDays          = 31
+	minCertLengthInDays       = 0
+	slackWebHook              = ""
+	environmentString         = ""
+	shouldAlertNoFlaggedCerts = false
 )
 
 func main() {
@@ -29,6 +30,7 @@ func main() {
 	cmd.Flags().IntVarP(&minCertLengthInDays, "min-cert-length-in-days", "l", minCertLengthInDays, "Sets the minimum number of days the certificate has to be valid before it is considered for alerting")
 	cmd.Flags().StringVarP(&slackWebHook, "slack-webhook", "s", slackWebHook, "Slack webhook url for the client to alert with")
 	cmd.Flags().StringVar(&environmentString, "environment", environmentString, "Adds an environment to your expired certs message")
+	cmd.Flags().BoolVar(&shouldAlertNoFlaggedCerts, "alert-no-flagged-certs", shouldAlertNoFlaggedCerts, "Sets whether we should send an alert for no flagged certificates")
 
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 
@@ -67,5 +69,12 @@ func runE(cmd *cobra.Command, args []string) error {
 		certs = append(certs, c...)
 	}
 
-	return checkCerts(certs, now)
+	flaggedCerts := checkCerts(certs, now)
+	if len(flaggedCerts) > 0 {
+		return alertExpiringCerts(flaggedCerts, now)
+	} else if shouldAlertNoFlaggedCerts {
+		return alertNoFlaggedCerts(len(secrets), len(certs))
+	}
+
+	return nil
 }
