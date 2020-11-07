@@ -17,12 +17,18 @@ func alertNoFlaggedCerts(secretCount, certCount int) error {
 		certText += "s"
 	}
 
+	environmentText := ""
+	if environmentString != "" {
+		environmentText = fmt.Sprintf("in %s", environmentString)
+	}
+
 	title := fmt.Sprintf(
-		"No flagged certificates found!\n Scanned *%v %s* and found *%v %s*",
+		"No flagged certificates found!\n Scanned *%v %s* and found *%v %s* %s",
 		secretCount,
 		secretText,
 		certCount,
 		certText,
+		environmentText,
 	)
 
 	message.Blocks = append(message.Blocks, SlackSection{
