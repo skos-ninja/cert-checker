@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -33,9 +34,23 @@ func sendToSlack(message SlackMessage) error {
 	if err != nil {
 		return err
 	}
-	_, err = http.Post(slackWebHook, "application/json", bytes.NewBuffer(buf))
+	resp, err := http.Post(slackWebHook, "application/json", bytes.NewBuffer(buf))
+
 	if err != nil {
+		log.Printf("Error sending message to slack  %s", err.Error())
 		return err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode > 299 {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bodyString := string(bodyBytes)
+
+		log.Printf("Error sending message to slack. StatusCode: %d. Resp: %s", resp.StatusCode, bodyString)
 	}
 
 	return nil
