@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -50,7 +51,7 @@ func sendToSlack(message SlackMessage) error {
 		}
 		bodyString := string(bodyBytes)
 
-		log.Printf("Error sending message to slack. StatusCode: %d. Resp: %s", resp.StatusCode, bodyString)
+		return fmt.Errorf("error sending message to slack. status code: %d. resp: %s", resp.StatusCode, bodyString)
 	}
 
 	return nil
