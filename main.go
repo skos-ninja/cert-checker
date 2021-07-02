@@ -41,6 +41,7 @@ func main() {
 
 func runE(cmd *cobra.Command, args []string) error {
 	now := time.Now()
+	ctx := cmd.Context()
 
 	client, err := getClientSet()
 	if err != nil {
@@ -48,13 +49,13 @@ func runE(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(namespaces) == 1 && namespaces[0] == allNamespaces {
-		namespaces, err = getNamespaces(client)
+		namespaces, err = getNamespaces(ctx, client)
 		if err != nil {
 			return err
 		}
 	}
 
-	secrets, err := getSecrets(client, namespaces...)
+	secrets, err := getSecrets(ctx, client, namespaces...)
 	if err != nil {
 		return err
 	}

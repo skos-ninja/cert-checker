@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -25,10 +27,10 @@ func getClientSet() (*kubernetes.Clientset, error) {
 	return clientset, nil
 }
 
-func getNamespaces(clientSet *kubernetes.Clientset) (namespaces []string, err error) {
+func getNamespaces(ctx context.Context, clientSet *kubernetes.Clientset) (namespaces []string, err error) {
 	nsInf := clientSet.CoreV1().Namespaces()
 	opts := metav1.ListOptions{}
-	ns, err := nsInf.List(opts)
+	ns, err := nsInf.List(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -40,13 +42,13 @@ func getNamespaces(clientSet *kubernetes.Clientset) (namespaces []string, err er
 	return namespaces, nil
 }
 
-func getSecrets(clientSet *kubernetes.Clientset, namespaces ...string) (secrets []corev1.Secret, err error) {
+func getSecrets(ctx context.Context, clientSet *kubernetes.Clientset, namespaces ...string) (secrets []corev1.Secret, err error) {
 	secretItems := make([]corev1.Secret, 0)
 
 	for _, namespace := range namespaces {
 		secretInf := clientSet.CoreV1().Secrets(namespace)
 		opts := metav1.ListOptions{}
-		secrets, err := secretInf.List(opts)
+		secrets, err := secretInf.List(ctx, opts)
 		if err != nil {
 			return nil, err
 		}
